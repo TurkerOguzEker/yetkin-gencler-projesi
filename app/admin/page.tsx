@@ -38,7 +38,7 @@ export default async function Home() {
               <span className="text-orange-400">Gençleri</span> Burada!
             </h1>
             <p className="text-lg md:text-xl text-blue-100 mb-8 max-w-xl mx-auto md:mx-0 leading-relaxed">
-              Lüleburgaz Belediyesi öncülüğünde; teknoloji, inovasyon ve mesleki eğitimlerle kariyerine güçlü bir başlangıç yap.
+              Kapaklı Belediyesi öncülüğünde; teknoloji, inovasyon ve mesleki eğitimlerle kariyerine güçlü bir başlangıç yap.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
               <Link 
@@ -185,7 +185,7 @@ export default async function Home() {
           <div className="flex flex-wrap justify-center items-center gap-12 opacity-70 grayscale hover:grayscale-0 transition duration-500">
             {/* Temsili Logolar (Yazı olarak) */}
             <div className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-              🏛️ <span>Lüleburgaz Belediyesi</span>
+              🏛️ <span>Kapaklı Belediyesi</span>
             </div>
             <div className="text-2xl font-bold text-gray-800 flex items-center gap-2">
               🏢 <span>Yerel Sanayi Kuruluşları</span>

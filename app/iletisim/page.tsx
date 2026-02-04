@@ -33,9 +33,9 @@ export default function IletisimPage() {
                   <div>
                     <h3 className="font-bold">Adres</h3>
                     <p className="text-blue-200 text-sm">
-                      Lüleburgaz Yıldızları Kadın Akademisi<br/>
+                      Kapaklı Yıldızları Kadın Akademisi<br/>
                       Sevgi Mahallesi, İstasyon Caddesi, No: 114<br/>
-                      Lüleburgaz / Kırklareli
+                      Kapaklı / Tekirdağ
                     </p>
                   </div>
                 </div>

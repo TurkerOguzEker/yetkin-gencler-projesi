@@ -1,145 +1,140 @@
 import Link from 'next/link';
 import { supabase } from "@/lib/supabaseClient";
+import MainSlider from "@/components/MainSlider";
 
-// Sayfa her açıldığında verilerin taze olmasını sağlar (Cache kapatma)
 export const revalidate = 0;
 
 export default async function Home() {
-  // 1. Veritabanından Son 3 Duyuruyu Çek
-  const { data: duyurular } = await supabase
-    .from('duyurular')
-    .select('*')
-    .eq('aktif', true)
-    .order('created_at', { ascending: false })
-    .limit(3);
-
-  // 2. Veritabanından Son 3 Eğitimi Çek
-  const { data: egitimler } = await supabase
-    .from('egitimler')
-    .select('*')
-    .order('baslangic_tarihi', { ascending: true })
-    .limit(3);
+  const { data: duyurular } = await supabase.from('duyurular').select('*').eq('aktif', true).order('created_at', { ascending: false }).limit(3);
+  const { data: egitimler } = await supabase.from('egitimler').select('*').order('baslangic_tarihi', { ascending: true }).limit(3);
 
   return (
     <div className="bg-gray-50 pb-20">
       
-      {/* --- HERO ALANI (KARŞILAMA) --- */}
-      <section className="relative bg-blue-900 text-white py-24 md:py-32 overflow-hidden">
-        {/* Arka plan süslemesi (Opsiyonel) */}
-        <div className="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-        
-        <div className="container mx-auto px-4 relative z-10 text-center">
-          <h1 className="text-4xl md:text-6xl font-extrabold mb-6 tracking-tight leading-tight">
-            Geleceğin Yetkin <span className="text-blue-300">Gençleri</span> <br />
-            Burada Yetişiyor
-          </h1>
-          <p className="text-lg md:text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
-            Lüleburgaz Belediyesi öncülüğünde, gençlerin mesleki ve sosyal becerilerini geliştirerek istihdama katılmalarını destekliyoruz.
-          </p>
-          <div className="flex flex-col md:flex-row gap-4 justify-center">
-            <Link 
-              href="/egitimler" 
-              className="px-8 py-4 bg-white text-blue-900 font-bold rounded-full hover:bg-blue-50 transition shadow-lg text-lg"
-            >
-              Eğitimlere Göz At
-            </Link>
-            <Link 
-              href="/hakkimizda" 
-              className="px-8 py-4 bg-blue-800 text-white border border-blue-700 font-bold rounded-full hover:bg-blue-700 transition text-lg"
-            >
-              Proje Hakkında
+      {/* 1. SLIDER ALANI */}
+      {/* Bu bileşenin üzerinde sayfa kaynaklı hiçbir engel yoktur */}
+      <MainSlider />
+
+      {/* 2. PROJE AMACI ALANI - MODERN OVAL TASARIM */}
+      <section className="py-24 container mx-auto px-4">
+        <div className="flex flex-col md:flex-row items-center gap-16">
+          
+          {/* Sol: Metin */}
+          <div className="flex-1">
+            <span className="text-orange-500 font-bold tracking-widest text-sm uppercase mb-2 block">Hakkımızda</span>
+            <h2 className="text-4xl md:text-5xl font-extrabold text-blue-900 mb-8 leading-tight">
+              Gençlerin Potansiyelini <br/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">Geleceğe Dönüştürüyoruz</span>
+            </h2>
+            <p className="text-gray-600 text-lg leading-relaxed mb-6">
+              Yetkin Gençler Projesi; <strong>Kapaklı'da</strong> yaşayan gençlerin kişisel ve mesleki gelişimlerine katkı sağlamak, onları teknoloji çağına hazırlamak ve istihdam edilebilirliklerini artırmak amacıyla hayata geçirilmiştir.
+            </p>
+            
+            <div className="flex gap-6 mt-10">
+              <div className="bg-white p-6 rounded-3xl shadow-xl shadow-blue-100 border border-blue-50 flex-1 hover:-translate-y-1 transition duration-300">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-2xl mb-4">🎯</div>
+                <span className="block font-bold text-blue-900 text-lg">Vizyon</span>
+                <span className="text-sm text-gray-500 mt-2 block">Teknoloji üreten, kendine güvenen bir gençlik.</span>
+              </div>
+              <div className="bg-white p-6 rounded-3xl shadow-xl shadow-orange-100 border border-orange-50 flex-1 hover:-translate-y-1 transition duration-300">
+                <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center text-2xl mb-4">🚀</div>
+                <span className="block font-bold text-orange-900 text-lg">Misyon</span>
+                <span className="text-sm text-gray-500 mt-2 block">Sektörün aradığı nitelikli iş gücünü yaratmak.</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Sağ: Resimler - Oval Köşeler */}
+          <div className="flex-1 relative">
+            <div className="relative z-10 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-blue-900/20 transform hover:scale-[1.02] transition duration-500">
+              <img src="https://images.unsplash.com/photo-1531545514256-b1400bc00f31?q=80&w=800&auto=format&fit=crop" alt="Proje Amacı" className="w-full h-auto object-cover" />
+            </div>
+            {/* Dekoratif Daire */}
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-orange-200 rounded-full blur-3xl opacity-60"></div>
+            <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-200 rounded-full blur-3xl opacity-60"></div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. GALERİ - YUVARLAK HATLAR */}
+      <section className="py-20 bg-white rounded-[3rem] mx-4 md:mx-10 shadow-sm border border-gray-100">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <span className="text-blue-600 font-bold uppercase tracking-widest text-xs bg-blue-50 px-3 py-1 rounded-full">ALBÜM</span>
+            <h2 className="text-3xl font-extrabold text-gray-900 mt-4">Faaliyetlerimizden Kareler</h2>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[
+              "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=600&auto=format&fit=crop",
+              "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=600&auto=format&fit=crop",
+              "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=600&auto=format&fit=crop",
+              "https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=600&auto=format&fit=crop"
+            ].map((img, i) => (
+              <div key={i} className="h-72 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl transition group cursor-pointer">
+                <img src={img} className="w-full h-full object-cover group-hover:scale-110 transition duration-700" alt={`Faaliyet ${i}`} />
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition"></div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="text-center mt-12">
+            <Link href="/medya" className="inline-block px-8 py-3 border-2 border-gray-200 text-gray-600 font-bold rounded-full hover:border-blue-600 hover:bg-blue-600 hover:text-white transition duration-300">
+              Tüm Albümü Görüntüle
             </Link>
           </div>
         </div>
       </section>
 
-      {/* --- EĞİTİMLER VİTRİNİ --- */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="flex justify-between items-end mb-8">
-          <div>
-            <span className="text-blue-600 font-bold uppercase tracking-wide text-sm">Kariyer Fırsatları</span>
-            <h2 className="text-3xl font-bold text-gray-900 mt-2">Yaklaşan Eğitimler</h2>
-          </div>
-          <Link href="/egitimler" className="text-blue-600 font-semibold hover:underline hidden md:block">
-            Tümünü Gör →
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {/* 4. EĞİTİM PROGRAMLARI - MODERN KARTLAR */}
+      <section id="egitimler" className="py-24 container mx-auto px-4">
+        <h2 className="text-4xl font-extrabold text-blue-900 mb-12 text-center">Eğitim Programları</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           {egitimler?.map((egitim) => (
-            <div key={egitim.id} className="bg-white rounded-xl shadow-md hover:shadow-xl transition duration-300 overflow-hidden border border-gray-100 group">
-              <div className="h-3 bg-blue-500 group-hover:bg-blue-600 transition"></div>
-              <div className="p-6">
-                <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded mb-3 inline-block">
-                  {egitim.kategori}
+            <div key={egitim.id} className="bg-white rounded-[2.5rem] shadow-xl shadow-gray-200 overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition duration-300 border border-gray-100 flex flex-col h-full">
+              <div className="bg-gradient-to-br from-blue-900 to-blue-700 text-white p-8 text-center relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10"></div>
+                <span className="block text-sm font-medium opacity-80 uppercase tracking-widest mb-1">{egitim.kategori}</span>
+                <h3 className="font-bold text-2xl mt-1 leading-tight">{egitim.ad}</h3>
+                <span className="inline-block mt-4 bg-white/20 px-4 py-1 rounded-full text-sm backdrop-blur-sm">
+                   📅 {new Date(egitim.baslangic_tarihi).toLocaleDateString('tr-TR')}
                 </span>
-                <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-blue-600 transition">
-                  {egitim.ad}
-                </h3>
-                <p className="text-gray-500 text-sm mb-4 line-clamp-2">
-                  {egitim.aciklama}
+              </div>
+              <div className="p-8 flex flex-col flex-grow">
+                <p className="text-gray-600 leading-relaxed mb-8 flex-grow">
+                  {egitim.aciklama.substring(0, 120)}...
                 </p>
-                <div className="flex items-center text-gray-400 text-sm">
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                  {new Date(egitim.baslangic_tarihi).toLocaleDateString('tr-TR')}
-                </div>
+                <Link href={`/egitimler/${egitim.id}`} className="block w-full text-center py-4 bg-gray-50 hover:bg-orange-500 hover:text-white text-gray-800 font-bold rounded-2xl transition shadow-sm hover:shadow-orange-200">
+                  İNCELE & BAŞVUR
+                </Link>
               </div>
             </div>
           ))}
-          
-          {egitimler?.length === 0 && (
-            <div className="col-span-3 text-center py-10 bg-white rounded-lg border border-dashed border-gray-300">
-              <p className="text-gray-500">Henüz planlanmış bir eğitim bulunmuyor.</p>
-            </div>
-          )}
-        </div>
-        
-        <div className="mt-6 text-center md:hidden">
-           <Link href="/egitimler" className="text-blue-600 font-bold hover:underline">Tüm Eğitimleri İncele</Link>
         </div>
       </section>
 
-      {/* --- DUYURULAR & HABERLER --- */}
-      <section className="bg-white py-16 border-t border-gray-100">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">Duyurular & Haberler</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {duyurular?.map((duyuru) => (
-              <article key={duyuru.id} className="flex flex-col h-full bg-gray-50 rounded-lg overflow-hidden hover:shadow-lg transition">
-                {/* Resim Varsa Göster, Yoksa Gri Alan Göster */}
-                <div className="h-48 w-full bg-gray-200 relative overflow-hidden">
-                  {duyuru.resim_url ? (
-                    <img src={duyuru.resim_url} alt={duyuru.baslik} className="w-full h-full object-cover hover:scale-105 transition duration-500" />
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-gray-400">
-                      <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="p-6 flex flex-col flex-grow">
-                  <div className="text-xs text-gray-400 mb-2">
-                    {new Date(duyuru.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-800 mb-3 leading-snug">
-                    {duyuru.baslik}
-                  </h3>
-                  <p className="text-gray-600 text-sm line-clamp-3 mb-4 flex-grow">
-                    {duyuru.icerik}
-                  </p>
-                  <button className="text-blue-600 font-semibold text-sm self-start hover:underline">
-                    Devamını Oku
-                  </button>
-                </div>
-              </article>
-            ))}
-
-            {duyurular?.length === 0 && (
-              <div className="col-span-3 text-center text-gray-500 py-10">
-                Yayında olan duyuru bulunamadı.
-              </div>
-            )}
+      {/* 5. DUYURULAR - CAM EFEKTİ (Glassmorphism) */}
+      <section id="duyurular" className="py-20 bg-gradient-to-r from-blue-900 to-indigo-900 text-white relative overflow-hidden">
+        {/* Arka plan süsleri */}
+        <div className="absolute top-0 left-0 w-full h-full opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+        <div className="absolute top-10 right-10 w-64 h-64 bg-blue-500 rounded-full blur-[100px] opacity-40"></div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <h2 className="text-3xl font-bold mb-12 text-center">Güncel Duyurular</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+             {duyurular?.map((duyuru) => (
+               <div key={duyuru.id} className="bg-white/10 p-8 rounded-[2rem] backdrop-blur-md border border-white/10 hover:bg-white/20 transition group cursor-pointer">
+                 <div className="flex items-center gap-2 mb-4">
+                   <span className="w-2 h-2 bg-orange-400 rounded-full"></span>
+                   <span className="text-orange-300 text-xs font-bold uppercase tracking-wide">
+                     {new Date(duyuru.created_at).toLocaleDateString('tr-TR')}
+                   </span>
+                 </div>
+                 <h3 className="text-xl font-bold mb-4 leading-snug group-hover:text-orange-200 transition">{duyuru.baslik}</h3>
+                 <p className="text-blue-100 text-sm line-clamp-3 mb-6 leading-relaxed opacity-80">{duyuru.icerik}</p>
+                 <button className="text-white font-bold text-sm bg-white/10 px-4 py-2 rounded-full group-hover:bg-orange-500 transition">OKU →</button>
+               </div>
+             ))}
           </div>
         </div>
       </section>

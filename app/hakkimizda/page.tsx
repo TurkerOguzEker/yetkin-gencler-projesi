@@ -34,7 +34,7 @@ export default function HakkimizdaPage() {
               Yetkin Gençler Projesi, NEET (Ne eğitimde ne istihdamda olan) gençlerin genel, sosyal ve mesleki beceri ve yetkinliklerini geliştirerek mevcut işgücü piyasasının ihtiyaçlarına uygun olarak istihdamını arttırmayı hedeflemektedir.
             </p>
             <p className="text-gray-600 mb-6 leading-relaxed">
-              Teknoloji odaklı eğitimlerimizle, gençleri sadece iş arayan değil, değer üreten bireyler haline getirmeyi amaçlıyoruz. Lüleburgaz Belediyesi öncülüğünde yürütülen bu proje, bölgesel kalkınmaya nitelikli insan kaynağı ile destek vermektedir.
+              Teknoloji odaklı eğitimlerimizle, gençleri sadece iş arayan değil, değer üreten bireyler haline getirmeyi amaçlıyoruz. Kapaklı Belediyesi öncülüğünde yürütülen bu proje, bölgesel kalkınmaya nitelikli insan kaynağı ile destek vermektedir.
             </p>
             
             <div className="grid grid-cols-2 gap-6 mt-8">

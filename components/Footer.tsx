@@ -24,7 +24,7 @@ export default function Footer() {
         {/* Bölüm 3 - İletişim */}
         <div>
           <h3 className="text-lg font-bold mb-4">İletişim</h3>
-          <p className="text-slate-400 text-sm">Lüleburgaz Yıldızları Kadın Akademisi</p>
+          <p className="text-slate-400 text-sm">Kapaklı Yıldızları Kadın Akademisi</p>
           <p className="text-slate-400 text-sm mt-2">info@yetkingencler.com</p>
         </div>
       </div>
