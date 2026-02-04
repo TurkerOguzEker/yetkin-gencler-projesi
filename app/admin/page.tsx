@@ -1,300 +1,202 @@
-"use client";
-import { useState, useEffect } from "react";
+import Link from 'next/link';
 import { supabase } from "@/lib/supabaseClient";
-import { useRouter } from "next/navigation";
 
-export default function AdminPage() {
-  const [user, setUser] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState("duyuru");
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  
-  // Veri Listeleri
-  const [duyuruList, setDuyuruList] = useState<any[]>([]);
-  const [egitimList, setEgitimList] = useState<any[]>([]);
-  
-  // Düzenleme Modu (Hangi ID düzenleniyor?)
-  const [editMode, setEditMode] = useState(false);
-  const [editId, setEditId] = useState<number | null>(null);
+// Sayfa her açıldığında verilerin taze olmasını sağlar
+export const revalidate = 0;
 
-  // Login State
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+export default async function Home() {
+  // Veritabanından Verileri Çek
+  const { data: duyurular } = await supabase
+    .from('duyurular')
+    .select('*')
+    .eq('aktif', true)
+    .order('created_at', { ascending: false })
+    .limit(3);
 
-  // Duyuru Form State
-  const [duyuruBaslik, setDuyuruBaslik] = useState("");
-  const [duyuruIcerik, setDuyuruIcerik] = useState("");
-  const [duyuruResim, setDuyuruResim] = useState("");
-
-  // Eğitim Form State
-  const [egitimAd, setEgitimAd] = useState("");
-  const [egitimAciklama, setEgitimAciklama] = useState("");
-  const [egitimKategori, setEgitimKategori] = useState("Genel");
-  const [egitimTarih, setEgitimTarih] = useState("");
-  const [egitimKontenjan, setEgitimKontenjan] = useState(0);
-
-  // 1. Sayfa Yüklenirken Verileri Çek
-  useEffect(() => {
-    const init = async () => {
-      // Oturum Kontrolü
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        setUser(session.user);
-        fetchData(); // Giriş yapılmışsa verileri getir
-      }
-    };
-    init();
-  }, []);
-
-  // VERİLERİ ÇEKME FONKSİYONU
-  const fetchData = async () => {
-    const { data: duyurular } = await supabase.from('duyurular').select('*').order('id', { ascending: false });
-    const { data: egitimler } = await supabase.from('egitimler').select('*').order('id', { ascending: false });
-    
-    if (duyurular) setDuyuruList(duyurular);
-    if (egitimler) setEgitimList(egitimler);
-  };
-
-  // GİRİŞ YAP
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) alert(error.message);
-    else window.location.reload();
-    setLoading(false);
-  };
-
-  // --- İŞLEM FONKSİYONLARI ---
-
-  // FORM SIFIRLAMA
-  const resetForm = () => {
-    setEditMode(false);
-    setEditId(null);
-    setDuyuruBaslik(""); setDuyuruIcerik(""); setDuyuruResim("");
-    setEgitimAd(""); setEgitimAciklama(""); setEgitimKontenjan(0); setEgitimTarih("");
-    setMessage("");
-  };
-
-  // SİLME İŞLEMİ
-  const handleDelete = async (table: string, id: number) => {
-    if (!confirm("Bu kaydı silmek istediğinize emin misiniz?")) return;
-
-    const { error } = await supabase.from(table).delete().eq('id', id);
-    if (error) {
-      alert("Hata: " + error.message);
-    } else {
-      fetchData(); // Listeyi güncelle
-      alert("Kayıt silindi.");
-    }
-  };
-
-  // DÜZENLEME MODUNU AÇMA (Verileri Forma Doldur)
-  const handleEditClick = (item: any, type: "duyuru" | "egitim") => {
-    setEditMode(true);
-    setEditId(item.id);
-    setActiveTab(type);
-    setMessage("Düzenleme Modu Aktif ✏️");
-
-    if (type === "duyuru") {
-      setDuyuruBaslik(item.baslik);
-      setDuyuruIcerik(item.icerik);
-      setDuyuruResim(item.resim_url || "");
-    } else {
-      setEgitimAd(item.ad);
-      setEgitimAciklama(item.aciklama);
-      setEgitimKategori(item.kategori);
-      setEgitimTarih(item.baslangic_tarihi);
-      setEgitimKontenjan(item.kontenjan);
-    }
-    
-    // Sayfanın en üstüne (forma) kaydır
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  // DUYURU KAYDET / GÜNCELLE
-  const handleSaveDuyuru = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setMessage("İşleniyor...");
-
-    const veri = { baslik: duyuruBaslik, icerik: duyuruIcerik, resim_url: duyuruResim, aktif: true };
-    
-    let error;
-    if (editMode && editId) {
-      // Güncelleme
-      const res = await supabase.from('duyurular').update(veri).eq('id', editId);
-      error = res.error;
-    } else {
-      // Yeni Ekleme
-      const res = await supabase.from('duyurular').insert([veri]);
-      error = res.error;
-    }
-
-    if (error) setMessage("Hata: " + error.message);
-    else {
-      setMessage(editMode ? "✅ Duyuru Güncellendi!" : "✅ Duyuru Eklendi!");
-      fetchData();
-      resetForm();
-    }
-  };
-
-  // EĞİTİM KAYDET / GÜNCELLE
-  const handleSaveEgitim = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setMessage("İşleniyor...");
-
-    const veri = { 
-      ad: egitimAd, 
-      aciklama: egitimAciklama, 
-      kategori: egitimKategori, 
-      baslangic_tarihi: egitimTarih, 
-      kontenjan: egitimKontenjan 
-    };
-
-    let error;
-    if (editMode && editId) {
-      // Güncelleme
-      const res = await supabase.from('egitimler').update(veri).eq('id', editId);
-      error = res.error;
-    } else {
-      // Yeni Ekleme
-      const res = await supabase.from('egitimler').insert([veri]);
-      error = res.error;
-    }
-
-    if (error) setMessage("Hata: " + error.message);
-    else {
-      setMessage(editMode ? "✅ Eğitim Güncellendi!" : "✅ Eğitim Eklendi!");
-      fetchData();
-      resetForm();
-    }
-  };
-
-  // --- GÖRÜNÜM ---
-  if (!user) return (
-    <div className="flex h-screen items-center justify-center bg-gray-100">
-      <form onSubmit={handleLogin} className="bg-white p-8 rounded shadow-md w-96">
-        <h2 className="text-xl font-bold mb-4">Admin Girişi</h2>
-        <input className="w-full mb-3 p-2 border rounded" type="email" placeholder="Email" onChange={e=>setEmail(e.target.value)} />
-        <input className="w-full mb-3 p-2 border rounded" type="password" placeholder="Şifre" onChange={e=>setPassword(e.target.value)} />
-        <button className="w-full bg-blue-600 text-white p-2 rounded" disabled={loading}>Giriş Yap</button>
-      </form>
-    </div>
-  );
+  const { data: egitimler } = await supabase
+    .from('egitimler')
+    .select('*')
+    .order('baslangic_tarihi', { ascending: true })
+    .limit(3);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Yönetim Paneli</h1>
-          <div className="flex gap-2">
-             <button onClick={resetForm} className="text-sm text-gray-500 hover:text-blue-600">Formu Temizle</button>
-             <button onClick={() => supabase.auth.signOut().then(()=>window.location.reload())} className="text-red-500 font-bold border px-3 py-1 rounded hover:bg-red-50">Çıkış</button>
+    <div className="bg-white pb-20">
+      
+      {/* --- 1. BÖLÜM: HERO (KARŞILAMA) ALANI --- */}
+      <section className="relative bg-gradient-to-r from-blue-900 to-blue-800 text-white py-24 md:py-36 overflow-hidden">
+        {/* Arka plan deseni */}
+        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+        
+        <div className="container mx-auto px-4 relative z-10 flex flex-col md:flex-row items-center gap-12">
+          {/* Sol: Metin */}
+          <div className="flex-1 text-center md:text-left">
+            <span className="inline-block py-1 px-3 rounded-full bg-orange-500 text-white text-xs font-bold tracking-wide mb-4 animate-pulse">
+              🚀 YENİ DÖNEM KAYITLARI BAŞLADI
+            </span>
+            <h1 className="text-4xl md:text-6xl font-extrabold mb-6 tracking-tight leading-tight">
+              Geleceğin Yetkin <br/>
+              <span className="text-orange-400">Gençleri</span> Burada!
+            </h1>
+            <p className="text-lg md:text-xl text-blue-100 mb-8 max-w-xl mx-auto md:mx-0 leading-relaxed">
+              Lüleburgaz Belediyesi öncülüğünde; teknoloji, inovasyon ve mesleki eğitimlerle kariyerine güçlü bir başlangıç yap.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+              <Link 
+                href="/kayit" 
+                className="px-8 py-4 bg-orange-500 text-white font-bold rounded-lg hover:bg-orange-600 transition shadow-lg shadow-orange-500/30 transform hover:-translate-y-1"
+              >
+                Hemen Başvur
+              </Link>
+              <Link 
+                href="/egitimler" 
+                className="px-8 py-4 bg-transparent border-2 border-white text-white font-bold rounded-lg hover:bg-white hover:text-blue-900 transition"
+              >
+                Eğitimleri İncele
+              </Link>
+            </div>
+          </div>
+          
+          {/* Sağ: Görsel (Temsili) */}
+          <div className="flex-1 hidden md:block relative">
+            <div className="relative z-10 rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20 transform rotate-2 hover:rotate-0 transition duration-500">
+               {/* Buraya gerçek bir fotoğraf koyabilirsin */}
+               <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=800&auto=format&fit=crop" alt="Gençler Eğitimde" className="w-full h-full object-cover" />
+            </div>
+            {/* Dekoratif daire */}
+            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-orange-500 rounded-full blur-3xl opacity-50"></div>
           </div>
         </div>
+      </section>
 
-        {/* SEKMELER */}
-        <div className="flex gap-4 mb-6 border-b">
-          <button onClick={() => { setActiveTab("duyuru"); resetForm(); }} className={`pb-2 px-4 ${activeTab === "duyuru" ? "border-b-2 border-blue-600 text-blue-600 font-bold" : "text-gray-500"}`}>📢 Duyurular</button>
-          <button onClick={() => { setActiveTab("egitim"); resetForm(); }} className={`pb-2 px-4 ${activeTab === "egitim" ? "border-b-2 border-blue-600 text-blue-600 font-bold" : "text-gray-500"}`}>🎓 Eğitimler</button>
-        </div>
-
-        {/* FORM ALANI */}
-        <div className={`p-6 rounded shadow mb-10 border-l-4 ${editMode ? "bg-yellow-50 border-yellow-400" : "bg-white border-blue-500"}`}>
-          <h3 className="font-bold mb-4 text-lg">
-            {editMode ? "✏️ Kaydı Düzenle" : (activeTab === "duyuru" ? "➕ Yeni Duyuru Ekle" : "➕ Yeni Eğitim Ekle")}
-          </h3>
-          
-          {message && <div className="mb-4 p-2 bg-blue-100 text-blue-800 rounded text-sm font-bold">{message}</div>}
-
-          {activeTab === "duyuru" ? (
-            <form onSubmit={handleSaveDuyuru} className="space-y-4">
-              <input className="w-full p-2 border rounded" placeholder="Başlık" value={duyuruBaslik} onChange={e=>setDuyuruBaslik(e.target.value)} required />
-              <textarea className="w-full p-2 border rounded" rows={3} placeholder="İçerik" value={duyuruIcerik} onChange={e=>setDuyuruIcerik(e.target.value)} required />
-              <input className="w-full p-2 border rounded" placeholder="Resim URL" value={duyuruResim} onChange={e=>setDuyuruResim(e.target.value)} />
-              <button className={`px-6 py-2 rounded text-white ${editMode ? "bg-yellow-600 hover:bg-yellow-700" : "bg-blue-600 hover:bg-blue-700"}`}>
-                {editMode ? "Güncellemeyi Kaydet" : "Duyuruyu Yayınla"}
-              </button>
-              {editMode && <button type="button" onClick={resetForm} className="ml-2 text-gray-500 underline">İptal</button>}
-            </form>
-          ) : (
-            <form onSubmit={handleSaveEgitim} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <input className="w-full p-2 border rounded" placeholder="Eğitim Adı" value={egitimAd} onChange={e=>setEgitimAd(e.target.value)} required />
-                <select className="w-full p-2 border rounded" value={egitimKategori} onChange={e=>setEgitimKategori(e.target.value)}>
-                  <option value="Genel">Genel Beceri</option>
-                  <option value="Mesleki">Mesleki Eğitim</option>
-                  <option value="Teknoloji">Teknoloji</option>
-                </select>
-              </div>
-              <textarea className="w-full p-2 border rounded" rows={3} placeholder="Açıklama" value={egitimAciklama} onChange={e=>setEgitimAciklama(e.target.value)} required />
-              <div className="grid grid-cols-2 gap-4">
-                <input type="date" className="w-full p-2 border rounded" value={egitimTarih} onChange={e=>setEgitimTarih(e.target.value)} required />
-                <input type="number" className="w-full p-2 border rounded" placeholder="Kontenjan" value={egitimKontenjan} onChange={e=>setEgitimKontenjan(Number(e.target.value))} />
-              </div>
-              <button className={`px-6 py-2 rounded text-white ${editMode ? "bg-yellow-600 hover:bg-yellow-700" : "bg-green-600 hover:bg-green-700"}`}>
-                {editMode ? "Güncellemeyi Kaydet" : "Eğitimi Oluştur"}
-              </button>
-              {editMode && <button type="button" onClick={resetForm} className="ml-2 text-gray-500 underline">İptal</button>}
-            </form>
-          )}
-        </div>
-
-        {/* --- LİSTELEME ALANI (TABLO) --- */}
-        <div className="bg-white rounded shadow p-6">
-          <h3 className="font-bold text-lg mb-4 text-gray-700">📋 Mevcut {activeTab === "duyuru" ? "Duyurular" : "Eğitimler"} Listesi</h3>
-          
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-100 text-gray-600 text-sm uppercase">
-                  <th className="p-3 border-b">ID</th>
-                  <th className="p-3 border-b">Başlık / Ad</th>
-                  <th className="p-3 border-b">Tarih</th>
-                  <th className="p-3 border-b text-right">İşlemler</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(activeTab === "duyuru" ? duyuruList : egitimList).map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50 border-b last:border-0">
-                    <td className="p-3 text-gray-500">#{item.id}</td>
-                    <td className="p-3 font-medium text-gray-800">
-                      {activeTab === "duyuru" ? item.baslik : item.ad}
-                      <div className="text-xs text-gray-400 font-normal truncate max-w-xs">
-                         {activeTab === "duyuru" ? item.icerik : item.aciklama}
-                      </div>
-                    </td>
-                    <td className="p-3 text-sm text-gray-500">
-                      {new Date(item.created_at).toLocaleDateString('tr-TR')}
-                    </td>
-                    <td className="p-3 text-right space-x-2">
-                      <button 
-                        onClick={() => handleEditClick(item, activeTab as any)}
-                        className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded text-sm hover:bg-yellow-200 transition"
-                      >
-                        Düzenle
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(activeTab === "duyuru" ? 'duyurular' : 'egitimler', item.id)}
-                        className="px-3 py-1 bg-red-100 text-red-700 rounded text-sm hover:bg-red-200 transition"
-                      >
-                        Sil
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                
-                {(activeTab === "duyuru" ? duyuruList : egitimList).length === 0 && (
-                  <tr>
-                    <td colSpan={4} className="p-4 text-center text-gray-400">Henüz veri eklenmemiş.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+      {/* --- 2. BÖLÜM: İSTATİSTİKLER (SAYILARLA BİZ) --- */}
+      <section className="py-16 bg-gray-50 border-b border-gray-200">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div className="p-4">
+              <div className="text-4xl md:text-5xl font-bold text-blue-900 mb-2">500+</div>
+              <div className="text-gray-600 font-medium">Mezun Genç</div>
+            </div>
+            <div className="p-4">
+              <div className="text-4xl md:text-5xl font-bold text-orange-500 mb-2">%85</div>
+              <div className="text-gray-600 font-medium">İstihdam Oranı</div>
+            </div>
+            <div className="p-4">
+              <div className="text-4xl md:text-5xl font-bold text-blue-900 mb-2">20+</div>
+              <div className="text-gray-600 font-medium">İş Ortağı</div>
+            </div>
+            <div className="p-4">
+              <div className="text-4xl md:text-5xl font-bold text-orange-500 mb-2">12</div>
+              <div className="text-gray-600 font-medium">Farklı Eğitim</div>
+            </div>
           </div>
         </div>
+      </section>
 
-      </div>
+      {/* --- 3. BÖLÜM: NEDEN KATILMALISIN? --- */}
+      <section className="py-20 container mx-auto px-4">
+        <div className="text-center mb-16">
+          <span className="text-blue-600 font-bold uppercase tracking-widest text-sm">AVANTAJLAR</span>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">Neden Yetkin Gençler?</h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+          {/* Kart 1 */}
+          <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition text-center group">
+            <div className="w-16 h-16 mx-auto bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-3xl mb-6 group-hover:bg-blue-600 group-hover:text-white transition">
+              🎓
+            </div>
+            <h3 className="text-xl font-bold text-gray-800 mb-3">Nitelikli Eğitim</h3>
+            <p className="text-gray-600">Alanında uzman eğitmenlerden, sektörün ihtiyaçlarına yönelik güncel müfredatla eğitim al.</p>
+          </div>
+
+          {/* Kart 2 */}
+          <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition text-center group">
+            <div className="w-16 h-16 mx-auto bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-3xl mb-6 group-hover:bg-orange-500 group-hover:text-white transition">
+              🚀
+            </div>
+            <h3 className="text-xl font-bold text-gray-800 mb-3">Kariyer Desteği</h3>
+            <p className="text-gray-600">CV hazırlama, mülakat simülasyonları ve mentörlük desteği ile iş hayatına hazırlan.</p>
+          </div>
+
+          {/* Kart 3 */}
+          <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition text-center group">
+            <div className="w-16 h-16 mx-auto bg-green-100 text-green-600 rounded-full flex items-center justify-center text-3xl mb-6 group-hover:bg-green-600 group-hover:text-white transition">
+              🤝
+            </div>
+            <h3 className="text-xl font-bold text-gray-800 mb-3">Güçlü Network</h3>
+            <p className="text-gray-600">Sektör liderleri ve diğer yetkin gençlerle tanışma fırsatı yakala, ağını genişlet.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* --- 4. BÖLÜM: EĞİTİMLER (DATABASE'DEN) --- */}
+      <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-end mb-10">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900">Yaklaşan Eğitimler</h2>
+              <p className="text-gray-600 mt-2">Başvurusu devam eden programlarımıza göz atın.</p>
+            </div>
+            <Link href="/egitimler" className="text-blue-600 font-bold hover:underline hidden md:block">
+              Tümünü Gör →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {egitimler?.map((egitim) => (
+              <div key={egitim.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-2xl transition duration-300 flex flex-col h-full">
+                <div className="h-2 bg-blue-500"></div>
+                <div className="p-6 flex flex-col flex-grow">
+                  <div className="flex justify-between items-start mb-4">
+                    <span className="bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded font-bold uppercase">
+                      {egitim.kategori}
+                    </span>
+                    <span className="text-sm text-gray-500 flex items-center">
+                      📅 {new Date(egitim.baslangic_tarihi).toLocaleDateString('tr-TR')}
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{egitim.ad}</h3>
+                  <p className="text-gray-600 text-sm mb-6 line-clamp-3 flex-grow">
+                    {egitim.aciklama}
+                  </p>
+                  <Link 
+                    href={`/egitimler/${egitim.id}`}
+                    className="block text-center w-full py-3 border border-blue-600 text-blue-600 font-bold rounded hover:bg-blue-600 hover:text-white transition"
+                  >
+                    Detayları İncele
+                  </Link>
+                </div>
+              </div>
+            ))}
+            
+            {egitimler?.length === 0 && (
+              <div className="col-span-3 text-center py-10">
+                <p className="text-gray-500">Şu an aktif bir eğitim bulunmuyor.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* --- 5. BÖLÜM: PAYDAŞLAR (Logolar) --- */}
+      <section className="py-16 border-t border-gray-100">
+        <div className="container mx-auto px-4 text-center">
+          <h3 className="text-gray-400 font-bold uppercase tracking-widest mb-8 text-sm">PROJE ORTAKLARIMIZ</h3>
+          <div className="flex flex-wrap justify-center items-center gap-12 opacity-70 grayscale hover:grayscale-0 transition duration-500">
+            {/* Temsili Logolar (Yazı olarak) */}
+            <div className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+              🏛️ <span>Lüleburgaz Belediyesi</span>
+            </div>
+            <div className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+              🏢 <span>Yerel Sanayi Kuruluşları</span>
+            </div>
+            <div className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+              🏫 <span>Üniversiteler</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 }
