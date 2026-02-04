@@ -138,15 +138,15 @@ export default function KayitPage() {
             <form className="space-y-6" onSubmit={handleVerify}>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 text-center">Doğrulama Kodu</label>
-                <input
-                  type="text"
-                  required
-                  className="text-center text-2xl tracking-widest block w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="123456"
-                  maxLength={6}
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                />
+                    <input
+                        type="text"
+                        required
+                        className="text-center text-2xl tracking-widest block w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="12345678" 
+                        maxLength={8} 
+                        value={code}
+                        onChange={(e) => setCode(e.target.value)}
+                    />
               </div>
 
               <button

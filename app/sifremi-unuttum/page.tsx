@@ -130,14 +130,14 @@ export default function SifremiUnuttumPage() {
             </div>
             <div>
               <input
-                type="text"
-                required
-                className="text-center text-2xl tracking-widest w-full px-3 py-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                placeholder="123456"
-                maxLength={6}
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-              />
+              type="text"
+              required
+              className="text-center text-2xl tracking-widest w-full px-3 py-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
+              placeholder="12345678"
+              maxLength={8}
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+/>
             </div>
             <button
               type="submit"
