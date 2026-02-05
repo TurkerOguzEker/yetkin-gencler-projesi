@@ -10,6 +10,10 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
 
+  // 🔴 ADMIN MAİLİNİZİ BURAYA YAZIN
+  // Bu mail ile giriş yapıldığında "Admin Paneli" butonu görünür.
+  const ADMIN_EMAIL = "admin@kapakli.bel.tr";
+
   useEffect(() => {
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -32,6 +36,9 @@ export default function Navbar() {
     `text-sm font-bold uppercase tracking-wide transition-all duration-300 px-3 py-1 rounded-full ${
       pathname === path ? "text-blue-700 bg-blue-50" : "text-gray-600 hover:text-blue-700 hover:bg-gray-50"
     }`;
+
+  // Admin mi kontrolü
+  const isAdmin = user?.email === ADMIN_EMAIL;
 
   return (
     // BURADAKİ bg-white/90 ve backdrop-blur KALDIRILDI -> Sadece bg-white
@@ -65,6 +72,17 @@ export default function Navbar() {
           <div className="hidden lg:flex items-center gap-3 border-l border-gray-100 pl-6 ml-2">
             {user ? (
               <div className="flex items-center gap-4">
+                
+                {/* 🔴 SADECE ADMIN GÖRÜR */}
+                {isAdmin && (
+                  <Link 
+                    href="/admin" 
+                    className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white text-xs font-bold uppercase px-4 py-2 rounded-full shadow-lg shadow-red-200 transition transform hover:-translate-y-0.5"
+                  >
+                    ⚙️ Admin Paneli
+                  </Link>
+                )}
+
                 <Link href="/profil" className="text-sm font-bold text-blue-700 hover:text-blue-900 bg-blue-50 px-4 py-2 rounded-full transition">Hesabım</Link>
                 <button onClick={handleLogout} className="text-sm text-red-500 hover:text-red-700 font-bold">Çıkış</button>
               </div>
@@ -88,10 +106,25 @@ export default function Navbar() {
       {isMobileMenuOpen && (
         <div className="xl:hidden bg-white border-t py-6 px-6 shadow-2xl absolute w-full z-40 rounded-b-3xl">
           <div className="flex flex-col space-y-4">
-            <Link href="/" className="font-bold text-gray-700 py-2 border-b border-gray-50">ANASAYFA</Link>
-            <Link href="/hakkimizda" className="font-bold text-gray-700 py-2 border-b border-gray-50">PROJE HAKKINDA</Link>
-            <Link href="/egitimler" className="font-bold text-gray-700 py-2 border-b border-gray-50">EĞİTİM PROGRAMLARI</Link>
-            <Link href="/giris" className="block text-center bg-orange-500 text-white py-3 rounded-full font-bold shadow-lg mt-4">GİRİŞ / KAYIT</Link>
+            <Link href="/" className="font-bold text-gray-700 py-2 border-b border-gray-50" onClick={() => setIsMobileMenuOpen(false)}>ANASAYFA</Link>
+            <Link href="/hakkimizda" className="font-bold text-gray-700 py-2 border-b border-gray-50" onClick={() => setIsMobileMenuOpen(false)}>PROJE HAKKINDA</Link>
+            <Link href="/faaliyetler" className="font-bold text-gray-700 py-2 border-b border-gray-50" onClick={() => setIsMobileMenuOpen(false)}>FAALİYETLER</Link>
+            <Link href="/egitimler" className="font-bold text-gray-700 py-2 border-b border-gray-50" onClick={() => setIsMobileMenuOpen(false)}>EĞİTİMLER</Link>
+            
+            {user ? (
+               <div className="flex flex-col gap-3 mt-4 border-t pt-4">
+                 {/* 🔴 MOBİLDE DE ADMIN BUTONU */}
+                 {isAdmin && (
+                   <Link href="/admin" className="block text-center bg-red-500 text-white py-3 rounded-full font-bold shadow-md" onClick={() => setIsMobileMenuOpen(false)}>
+                     ⚙️ Admin Paneli
+                   </Link>
+                 )}
+                 <Link href="/profil" className="block text-center bg-blue-50 text-blue-700 py-3 rounded-full font-bold" onClick={() => setIsMobileMenuOpen(false)}>Hesabım</Link>
+                 <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="block text-center text-red-500 font-bold py-2">Çıkış Yap</button>
+               </div>
+            ) : (
+               <Link href="/giris" className="block text-center bg-orange-500 text-white py-3 rounded-full font-bold shadow-lg mt-4" onClick={() => setIsMobileMenuOpen(false)}>GİRİŞ / KAYIT</Link>
+            )}
           </div>
         </div>
       )}
