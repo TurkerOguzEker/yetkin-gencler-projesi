@@ -1,10 +1,10 @@
-import { createClient } from '@supabase/supabase-js';
+import { createBrowserClient } from '@supabase/ssr'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// "createBrowserClient" fonksiyonu, giriş yapıldığında 
+// oturum bilgisini otomatik olarak Çerezlere (Cookie) yazar.
+// Böylece Admin paneli (Sunucu) sizi tanıyabilir.
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error("Supabase URL veya Anon Key bulunamadı! .env.local dosyasını kontrol edin.");
-}
-
-export const supabase = createClient(supabaseUrl, supabaseKey);
+export const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)

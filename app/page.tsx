@@ -121,21 +121,27 @@ export default async function Home() {
         
         <div className="container mx-auto px-4 relative z-10">
           <h2 className="text-3xl font-bold mb-12 text-center">Güncel Duyurular</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-             {duyurular?.map((duyuru) => (
-               <div key={duyuru.id} className="bg-white/10 p-8 rounded-[2rem] backdrop-blur-md border border-white/10 hover:bg-white/20 transition group cursor-pointer">
-                 <div className="flex items-center gap-2 mb-4">
-                   <span className="w-2 h-2 bg-orange-400 rounded-full"></span>
-                   <span className="text-orange-300 text-xs font-bold uppercase tracking-wide">
-                     {new Date(duyuru.created_at).toLocaleDateString('tr-TR')}
-                   </span>
-                 </div>
-                 <h3 className="text-xl font-bold mb-4 leading-snug group-hover:text-orange-200 transition">{duyuru.baslik}</h3>
-                 <p className="text-blue-100 text-sm line-clamp-3 mb-6 leading-relaxed opacity-80">{duyuru.icerik}</p>
-                 <button className="text-white font-bold text-sm bg-white/10 px-4 py-2 rounded-full group-hover:bg-orange-500 transition">OKU →</button>
-               </div>
-             ))}
-          </div>
+         
+
+{/* 5. DUYURULAR KISMI GÜNCELLEMESİ */}
+<div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+    {duyurular?.map((duyuru) => (
+    <Link key={duyuru.id} href={`/duyurular/${duyuru.id}`} className="block"> 
+        <div className="bg-white/10 p-8 rounded-[2rem] backdrop-blur-md border border-white/10 hover:bg-white/20 transition group cursor-pointer h-full flex flex-col">
+            <div className="flex items-center gap-2 mb-4">
+            <span className="w-2 h-2 bg-orange-400 rounded-full"></span>
+            <span className="text-orange-300 text-xs font-bold uppercase tracking-wide">
+                {new Date(duyuru.created_at).toLocaleDateString('tr-TR')}
+            </span>
+            </div>
+            <h3 className="text-xl font-bold mb-4 leading-snug group-hover:text-orange-200 transition">{duyuru.baslik}</h3>
+            <p className="text-blue-100 text-sm line-clamp-3 mb-6 leading-relaxed opacity-80 flex-grow">{duyuru.icerik}</p>
+            <span className="inline-block text-white font-bold text-sm bg-white/10 px-4 py-2 rounded-full group-hover:bg-orange-500 transition text-center">OKU →</span>
+        </div>
+    </Link>
+    ))}
+</div>
+
         </div>
       </section>
 
