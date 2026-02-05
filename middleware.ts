@@ -2,9 +2,6 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  // 🔴 SADECE BU MAİL ADRESİ GİREBİLİR
-  const ADMIN_EMAIL = "admin@kapakli.bel.tr";
-
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -34,26 +31,15 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Giriş yapan kullanıcıyı kontrol et
-  const { data: { user } } = await supabase.auth.getUser()
-
-  // SADECE /admin SAYFALARINI KORU
-  if (request.nextUrl.pathname.startsWith('/admin')) {
-    
-    // 1. Hiç giriş yapmamışsa -> Giriş sayfasına at
-    if (!user) {
-      return NextResponse.redirect(new URL('/giris', request.url))
-    }
-
-    // 2. Giriş yapmış ama Admin değilse -> Ana sayfaya at
-    if (user.email !== ADMIN_EMAIL) {
-      return NextResponse.redirect(new URL('/', request.url))
-    }
-  }
+  // Sadece oturumu tazelemek için çağırıyoruz.
+  // Yetki kontrolünü artık sayfa (page.tsx) yapacak.
+  await supabase.auth.getUser()
 
   return response
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 }
