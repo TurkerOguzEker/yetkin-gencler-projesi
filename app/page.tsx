@@ -9,10 +9,10 @@ export default async function Home() {
   const { data: egitimler } = await supabase.from('egitimler').select('*').order('baslangic_tarihi', { ascending: true }).limit(3);
 
   return (
-    <div className="bg-gray-50 pb-20">
+    // DÜZELTME BURADA YAPILDI: "overflow-x-hidden" ve "w-full" eklendi
+    <div className="bg-gray-50 pb-20 overflow-x-hidden w-full">
       
       {/* 1. SLIDER ALANI */}
-      {/* Bu bileşenin üzerinde sayfa kaynaklı hiçbir engel yoktur */}
       <MainSlider />
 
       {/* 2. PROJE AMACI ALANI - MODERN OVAL TASARIM */}
@@ -49,7 +49,7 @@ export default async function Home() {
             <div className="relative z-10 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-blue-900/20 transform hover:scale-[1.02] transition duration-500">
               <img src="https://images.unsplash.com/photo-1531545514256-b1400bc00f31?q=80&w=800&auto=format&fit=crop" alt="Proje Amacı" className="w-full h-auto object-cover" />
             </div>
-            {/* Dekoratif Daire */}
+            {/* Dekoratif Daireler (Taşmaya sebep olan bunlardı, şimdi gizlenecekler) */}
             <div className="absolute -top-10 -right-10 w-40 h-40 bg-orange-200 rounded-full blur-3xl opacity-60"></div>
             <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-200 rounded-full blur-3xl opacity-60"></div>
           </div>
@@ -73,7 +73,7 @@ export default async function Home() {
             ].map((img, i) => (
               <div key={i} className="h-72 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl transition group cursor-pointer">
                 <img src={img} className="w-full h-full object-cover group-hover:scale-110 transition duration-700" alt={`Faaliyet ${i}`} />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition"></div>
+                
               </div>
             ))}
           </div>
@@ -113,7 +113,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* 5. DUYURULAR - CAM EFEKTİ (Glassmorphism) */}
+      {/* 5. DUYURULAR - CAM EFEKTİ */}
       <section id="duyurular" className="py-20 bg-gradient-to-r from-blue-900 to-indigo-900 text-white relative overflow-hidden">
         {/* Arka plan süsleri */}
         <div className="absolute top-0 left-0 w-full h-full opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>

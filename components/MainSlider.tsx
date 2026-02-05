@@ -40,8 +40,9 @@ export default function MainSlider() {
   }, []);
 
   return (
-    <div className="relative h-[550px] md:h-[650px] w-full overflow-hidden bg-gray-100 rounded-b-[3rem] shadow-2xl z-0">
-      {/* Slaytlar */}
+    // Ana kapsayıcı: Arka plan beyaz, alt köşeler yuvarlak
+    <div className="relative h-[550px] md:h-[650px] w-full overflow-hidden bg-white rounded-b-[3rem] shadow-xl z-0">
+      
       {slides.map((slide, index) => (
         <div
           key={slide.id}
@@ -49,26 +50,28 @@ export default function MainSlider() {
             index === current ? "opacity-100" : "opacity-0"
           }`}
         >
-          {/* Arka Plan Resmi - Karartma/Filtre YOK */}
-          <div 
-            className="absolute inset-0 bg-cover bg-center transition-transform duration-[5000ms] ease-linear transform scale-105 hover:scale-100"
-            style={{ backgroundImage: `url(${slide.image})` }}
-          >
-            {/* Buradaki tüm overlay div'leri silindi, sadece saf resim var */}
+          {/* --- RESİM ALANI (FİLTRESİZ) --- */}
+          <div className="absolute inset-0 w-full h-full">
+            <img 
+              src={slide.image} 
+              alt={slide.title}
+              className="w-full h-full object-cover object-center"
+            />
           </div>
 
-          {/* İçerik */}
-          <div className="relative container mx-auto px-4 h-full flex flex-col justify-center text-white">
-            {/* Yazıların okunması için güçlü drop-shadow eklendi */}
-            <h2 className="text-5xl md:text-7xl font-extrabold mb-6 animate-fade-in-up tracking-tight drop-shadow-[0_4px_4px_rgba(0,0,0,0.9)]">
+          {/* --- YAZI ALANI --- */}
+          <div className="relative container mx-auto px-4 h-full flex flex-col justify-center items-start z-10">
+            {/* Yazıların okunması için çok hafif bir metin gölgesi (text-shadow) */}
+            <h2 className="text-5xl md:text-7xl font-extrabold mb-6 text-white" style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.5)" }}>
               {slide.title}
             </h2>
-            <p className="text-lg md:text-2xl text-white mb-10 max-w-2xl leading-relaxed drop-shadow-[0_3px_3px_rgba(0,0,0,0.9)] font-bold">
+            <p className="text-lg md:text-2xl text-white mb-10 max-w-2xl font-bold" style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.5)" }}>
               {slide.subtitle}
             </p>
+            
             <Link
               href={slide.link}
-              className="w-fit px-10 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-full transition transform hover:scale-105 shadow-xl hover:shadow-orange-500/50"
+              className="px-10 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-full transition transform hover:scale-105 shadow-lg"
             >
               {slide.buttonText}
             </Link>
@@ -76,14 +79,14 @@ export default function MainSlider() {
         </div>
       ))}
 
-      {/* Noktalar */}
-      <div className="absolute bottom-10 left-0 right-0 flex justify-center gap-3">
+      {/* --- ALT NOKTALAR --- */}
+      <div className="absolute bottom-10 left-0 right-0 flex justify-center gap-3 z-20">
         {slides.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrent(index)}
-            className={`h-3 rounded-full transition-all duration-300 shadow-md ${
-              index === current ? "bg-orange-500 w-10" : "bg-white w-3 hover:bg-gray-200"
+            className={`h-3 rounded-full transition-all duration-300 shadow-sm border border-white/20 ${
+              index === current ? "bg-orange-500 w-10" : "bg-white/80 w-3 hover:bg-white"
             }`}
           />
         ))}
