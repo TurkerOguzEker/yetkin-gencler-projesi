@@ -1,39 +1,70 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
 
-export function middleware(req: NextRequest) {
-  // Sadece /admin ile başlayan yolları kontrol et
-  if (req.nextUrl.pathname.startsWith('/admin')) {
+export async function middleware(request: NextRequest) {
+  // 🔴 ADMIN MAİLİNİ BURAYA YAZ (Navbar ile aynı olmalı)
+  const ADMIN_EMAIL = "ekerturkeroguz@gmail.com";
+
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  })
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+
+  // Giriş yapan kullanıcıyı bul
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  // SADECE /admin SAYFALARINI KORU
+  if (request.nextUrl.pathname.startsWith('/admin')) {
     
-    // Tarayıcıdan gelen yetki bilgisini al
-    const basicAuth = req.headers.get('authorization');
-    const url = req.nextUrl;
-
-    if (basicAuth) {
-      const authValue = basicAuth.split(' ')[1];
-      // Kullanıcı adı ve şifreyi çöz (base64)
-      const [user, pwd] = atob(authValue).split(':');
-
-      // .env dosyasındaki bilgilerle eşleşiyor mu?
-      if (user === process.env.ADMIN_USER && pwd === process.env.ADMIN_PASSWORD) {
-        return NextResponse.next(); // Geçiş izni ver
-      }
+    // 1. Hiç giriş yapmamışsa -> Giriş sayfasına at
+    if (!user) {
+      return NextResponse.redirect(new URL('/giris', request.url))
     }
 
-    // Eşleşmezse veya bilgi yoksa giriş penceresi aç
-    url.pathname = '/api/auth';
-    return new NextResponse('Giriş Yetkisi Gerekli', {
-      status: 401,
-      headers: {
-        'WWW-Authenticate': 'Basic realm="Secure Area"',
-      },
-    });
+    // 2. Giriş yapmış ama Admin değilse -> Ana sayfaya at
+    if (user.email !== ADMIN_EMAIL) {
+      return NextResponse.redirect(new URL('/', request.url))
+    }
   }
 
-  return NextResponse.next();
+  return response
 }
 
-// Hangi yollarda çalışacağını belirtiyoruz
 export const config = {
-  matcher: ['/admin/:path*'],
-};
+  matcher: [
+    /*
+     * Aşağıdaki yollar hariç tüm isteklerde çalışır:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - images (public images)
+     */
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
+}
