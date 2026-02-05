@@ -2,8 +2,8 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  // 🔴 ADMIN MAİLİNİ BURAYA YAZ (Navbar ile aynı olmalı)
-  const ADMIN_EMAIL = "ekerturkeroguz@gmail.com";
+  // 🔴 SADECE BU MAİL ADRESİ GİREBİLİR
+  const ADMIN_EMAIL = "admin@kapakli.bel.tr";
 
   let response = NextResponse.next({
     request: {
@@ -34,10 +34,8 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Giriş yapan kullanıcıyı bul
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // Giriş yapan kullanıcıyı kontrol et
+  const { data: { user } } = await supabase.auth.getUser()
 
   // SADECE /admin SAYFALARINI KORU
   if (request.nextUrl.pathname.startsWith('/admin')) {
@@ -57,14 +55,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Aşağıdaki yollar hariç tüm isteklerde çalışır:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - images (public images)
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
 }

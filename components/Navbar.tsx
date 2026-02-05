@@ -6,28 +6,52 @@ import { useRouter, usePathname } from 'next/navigation';
 
 export default function Navbar() {
   const [user, setUser] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false); // Admin durumu için state
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
-  // 🔴 ADMIN MAİLİNİZİ BURAYA YAZIN
-  // Bu mail ile giriş yapıldığında "Admin Paneli" butonu görünür.
-  const ADMIN_EMAIL = "admin@kapakli.bel.tr";
-
   useEffect(() => {
-    const getSession = async () => {
+    // 1. Kullanıcı oturumunu ve rolünü kontrol et
+    const checkUserAndRole = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        setUser(session.user);
+        
+        // 2. Veritabanından (profiles tablosundan) kullanıcının rolünü çek
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+
+        // 3. Eğer rolü 'admin' ise yetki ver
+        if (profile?.role === 'admin') {
+          setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
+        }
+      } else {
+        setUser(null);
+        setIsAdmin(false);
+      }
     };
-    getSession();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+
+    checkUserAndRole();
+
+    // Oturum değişirse (Giriş/Çıkış) tekrar kontrol et
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      checkUserAndRole();
     });
+
     return () => subscription.unsubscribe();
   }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    setUser(null);
+    setIsAdmin(false);
     router.push('/');
     router.refresh();
   };
@@ -37,11 +61,7 @@ export default function Navbar() {
       pathname === path ? "text-blue-700 bg-blue-50" : "text-gray-600 hover:text-blue-700 hover:bg-gray-50"
     }`;
 
-  // Admin mi kontrolü
-  const isAdmin = user?.email === ADMIN_EMAIL;
-
   return (
-    // BURADAKİ bg-white/90 ve backdrop-blur KALDIRILDI -> Sadece bg-white
     <nav className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm font-sans transition-all">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-24">
@@ -57,7 +77,7 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* MENÜ */}
+          {/* MENÜ (Masaüstü) */}
           <div className="hidden xl:flex items-center space-x-2">
             <Link href="/" className={navLinkStyle('/')}>ANASAYFA</Link>
             <Link href="/hakkimizda" className={navLinkStyle('/hakkimizda')}>PROJE HAKKINDA</Link>
@@ -73,11 +93,11 @@ export default function Navbar() {
             {user ? (
               <div className="flex items-center gap-4">
                 
-                {/* 🔴 SADECE ADMIN GÖRÜR */}
+                {/* 🔴 SADECE VERİTABANINDA 'admin' YAZANLAR GÖRÜR */}
                 {isAdmin && (
                   <Link 
                     href="/admin" 
-                    className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white text-xs font-bold uppercase px-4 py-2 rounded-full shadow-lg shadow-red-200 transition transform hover:-translate-y-0.5"
+                    className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold uppercase px-4 py-2 rounded-full shadow-lg shadow-red-200 transition transform hover:-translate-y-0.5 animate-pulse"
                   >
                     ⚙️ Admin Paneli
                   </Link>
@@ -113,9 +133,9 @@ export default function Navbar() {
             
             {user ? (
                <div className="flex flex-col gap-3 mt-4 border-t pt-4">
-                 {/* 🔴 MOBİLDE DE ADMIN BUTONU */}
+                 {/* MOBİLDE DE SADECE ADMİNLERE GÖRÜNÜR */}
                  {isAdmin && (
-                   <Link href="/admin" className="block text-center bg-red-500 text-white py-3 rounded-full font-bold shadow-md" onClick={() => setIsMobileMenuOpen(false)}>
+                   <Link href="/admin" className="block text-center bg-red-600 text-white py-3 rounded-full font-bold shadow-md animate-pulse" onClick={() => setIsMobileMenuOpen(false)}>
                      ⚙️ Admin Paneli
                    </Link>
                  )}
