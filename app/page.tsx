@@ -9,17 +9,14 @@ export default async function Home() {
   const { data: egitimler } = await supabase.from('egitimler').select('*').order('baslangic_tarihi', { ascending: true }).limit(3);
 
   return (
-    // DÜZELTME BURADA YAPILDI: "overflow-x-hidden" ve "w-full" eklendi
     <div className="bg-gray-50 pb-20 overflow-x-hidden w-full">
       
       {/* 1. SLIDER ALANI */}
       <MainSlider />
 
-      {/* 2. PROJE AMACI ALANI - MODERN OVAL TASARIM */}
+      {/* 2. PROJE AMACI */}
       <section className="py-24 container mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center gap-16">
-          
-          {/* Sol: Metin */}
           <div className="flex-1">
             <span className="text-orange-500 font-bold tracking-widest text-sm uppercase mb-2 block">Hakkımızda</span>
             <h2 className="text-4xl md:text-5xl font-extrabold text-blue-900 mb-8 leading-tight">
@@ -44,19 +41,17 @@ export default async function Home() {
             </div>
           </div>
 
-          {/* Sağ: Resimler - Oval Köşeler */}
           <div className="flex-1 relative">
             <div className="relative z-10 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-blue-900/20 transform hover:scale-[1.02] transition duration-500">
               <img src="https://images.unsplash.com/photo-1531545514256-b1400bc00f31?q=80&w=800&auto=format&fit=crop" alt="Proje Amacı" className="w-full h-auto object-cover" />
             </div>
-            {/* Dekoratif Daireler (Taşmaya sebep olan bunlardı, şimdi gizlenecekler) */}
             <div className="absolute -top-10 -right-10 w-40 h-40 bg-orange-200 rounded-full blur-3xl opacity-60"></div>
             <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-200 rounded-full blur-3xl opacity-60"></div>
           </div>
         </div>
       </section>
 
-      {/* 3. GALERİ - YUVARLAK HATLAR */}
+      {/* 3. GALERİ */}
       <section className="py-20 bg-white rounded-[3rem] mx-4 md:mx-10 shadow-sm border border-gray-100">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -73,7 +68,7 @@ export default async function Home() {
             ].map((img, i) => (
               <div key={i} className="h-72 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl transition group cursor-pointer">
                 <img src={img} className="w-full h-full object-cover group-hover:scale-110 transition duration-700" alt={`Faaliyet ${i}`} />
-                
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition"></div>
               </div>
             ))}
           </div>
@@ -86,7 +81,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* 4. EĞİTİM PROGRAMLARI - MODERN KARTLAR */}
+      {/* 4. EĞİTİM PROGRAMLARI */}
       <section id="egitimler" className="py-24 container mx-auto px-4">
         <h2 className="text-4xl font-extrabold text-blue-900 mb-12 text-center">Eğitim Programları</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
@@ -113,35 +108,31 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* 5. DUYURULAR - CAM EFEKTİ */}
+      {/* 5. DUYURULAR - ARTIK TIKLANABİLİR LİNK VAR */}
       <section id="duyurular" className="py-20 bg-gradient-to-r from-blue-900 to-indigo-900 text-white relative overflow-hidden">
-        {/* Arka plan süsleri */}
         <div className="absolute top-0 left-0 w-full h-full opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
         <div className="absolute top-10 right-10 w-64 h-64 bg-blue-500 rounded-full blur-[100px] opacity-40"></div>
         
         <div className="container mx-auto px-4 relative z-10">
           <h2 className="text-3xl font-bold mb-12 text-center">Güncel Duyurular</h2>
-         
-
-{/* 5. DUYURULAR KISMI GÜNCELLEMESİ */}
-<div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-    {duyurular?.map((duyuru) => (
-    <Link key={duyuru.id} href={`/duyurular/${duyuru.id}`} className="block"> 
-        <div className="bg-white/10 p-8 rounded-[2rem] backdrop-blur-md border border-white/10 hover:bg-white/20 transition group cursor-pointer h-full flex flex-col">
-            <div className="flex items-center gap-2 mb-4">
-            <span className="w-2 h-2 bg-orange-400 rounded-full"></span>
-            <span className="text-orange-300 text-xs font-bold uppercase tracking-wide">
-                {new Date(duyuru.created_at).toLocaleDateString('tr-TR')}
-            </span>
-            </div>
-            <h3 className="text-xl font-bold mb-4 leading-snug group-hover:text-orange-200 transition">{duyuru.baslik}</h3>
-            <p className="text-blue-100 text-sm line-clamp-3 mb-6 leading-relaxed opacity-80 flex-grow">{duyuru.icerik}</p>
-            <span className="inline-block text-white font-bold text-sm bg-white/10 px-4 py-2 rounded-full group-hover:bg-orange-500 transition text-center">OKU →</span>
-        </div>
-    </Link>
-    ))}
-</div>
-
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+             {duyurular?.map((duyuru) => (
+               // GÜNCELLEME: Tüm kart bir Link içine alındı
+               <Link key={duyuru.id} href={`/duyurular/${duyuru.id}`} className="block">
+                 <div className="bg-white/10 p-8 rounded-[2rem] backdrop-blur-md border border-white/10 hover:bg-white/20 transition group cursor-pointer h-full flex flex-col">
+                   <div className="flex items-center gap-2 mb-4">
+                     <span className="w-2 h-2 bg-orange-400 rounded-full"></span>
+                     <span className="text-orange-300 text-xs font-bold uppercase tracking-wide">
+                       {new Date(duyuru.created_at).toLocaleDateString('tr-TR')}
+                     </span>
+                   </div>
+                   <h3 className="text-xl font-bold mb-4 leading-snug group-hover:text-orange-200 transition">{duyuru.baslik}</h3>
+                   <p className="text-blue-100 text-sm line-clamp-3 mb-6 leading-relaxed opacity-80 flex-grow">{duyuru.icerik}</p>
+                   <span className="inline-block text-white font-bold text-sm bg-white/10 px-4 py-2 rounded-full group-hover:bg-orange-500 transition text-center">OKU →</span>
+                 </div>
+               </Link>
+             ))}
+          </div>
         </div>
       </section>
 

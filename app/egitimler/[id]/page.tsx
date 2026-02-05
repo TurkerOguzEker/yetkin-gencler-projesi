@@ -1,18 +1,20 @@
 import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import BasvuruButonu from "@/components/BasvuruButonu"; // Yeni butonu ekledik
+import BasvuruButonu from "@/components/BasvuruButonu";
 
+// Sayfa her açıldığında verilerin taze olmasını sağlar
 export const revalidate = 0;
+export const dynamic = "force-dynamic";
 
 interface PageProps {
-  params: {
-    id: string;
-  };
+  // DÜZELTME: params artık bir Promise'dir
+  params: Promise<{ id: string }>;
 }
 
 export default async function EgitimDetayPage({ params }: PageProps) {
-  const { id } = params;
+  // DÜZELTME: params'ı await ile bekliyoruz
+  const { id } = await params;
 
   // Veritabanından eğitimi çek
   const { data: egitim } = await supabase
@@ -39,7 +41,6 @@ export default async function EgitimDetayPage({ params }: PageProps) {
           
           {/* Üst Başlık (Header) */}
           <div className="bg-gradient-to-r from-blue-900 to-blue-800 text-white p-10 md:p-16 relative overflow-hidden">
-            {/* Arkaplan Süsü */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20 blur-3xl"></div>
             
             <div className="relative z-10">
@@ -84,7 +85,7 @@ export default async function EgitimDetayPage({ params }: PageProps) {
                     Kontenjanlar dolmadan yerini ayırt, geleceğe bir adım at.
                   </p>
                   
-                  {/* AKILLI BUTON BURADA */}
+                  {/* Başvuru Butonu */}
                   <BasvuruButonu egitimId={egitim.id} />
                   
                   <p className="text-xs text-center text-gray-400 mt-4">

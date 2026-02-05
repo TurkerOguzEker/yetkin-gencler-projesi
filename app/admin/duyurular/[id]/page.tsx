@@ -3,18 +3,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 export const revalidate = 0;
+export const dynamic = "force-dynamic";
 
 interface PageProps {
-  params: {
-    id: string;
-  };
+  params: Promise<{ id: string }>;
 }
 
 export default async function DuyuruDetayPage({ params }: PageProps) {
-  // Next.js 15 uyumluluğu için params'ı await ediyoruz (Gerekirse)
-  const { id } = params;
+  const { id } = await params;
 
-  // Veritabanından duyuruyu çek
   const { data: duyuru } = await supabase
     .from('duyurular')
     .select('*')
@@ -29,7 +26,6 @@ export default async function DuyuruDetayPage({ params }: PageProps) {
     <div className="min-h-screen bg-gray-50 py-12 md:py-20">
       <div className="container mx-auto px-4 max-w-4xl">
         
-        {/* Geri Dön Linki */}
         <Link href="/#duyurular" className="inline-flex items-center text-gray-500 hover:text-blue-600 mb-8 font-bold transition group">
           <span className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-md group-hover:bg-blue-600 group-hover:text-white mr-3 transition">←</span>
           Ana Sayfaya Dön
@@ -37,7 +33,6 @@ export default async function DuyuruDetayPage({ params }: PageProps) {
 
         <div className="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-gray-100">
           
-          {/* Üst Başlık */}
           <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-10 md:p-14 text-white relative">
             <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
             
@@ -50,7 +45,6 @@ export default async function DuyuruDetayPage({ params }: PageProps) {
             </div>
           </div>
 
-          {/* İçerik */}
           <div className="p-10 md:p-14">
             <div className="prose prose-lg text-gray-600 leading-loose whitespace-pre-wrap">
               {duyuru.icerik}
